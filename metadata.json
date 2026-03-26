@@ -1,0 +1,5 @@
+{
+  "name": "Baggage Tracker Admin",
+  "description": "Professional airline operations dashboard for tracking baggage, managing passengers, and handling claims.",
+  "requestFramePermissions": []
+}
