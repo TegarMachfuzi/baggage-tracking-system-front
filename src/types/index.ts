@@ -19,8 +19,8 @@ export interface Passenger {
   name: string;
   email: string;
   phone: string;
-  bookingRef: string;
-  flightInfo: string;
+  passportNumber: string;
+  nationality: string;
 }
 
 export type BaggageStatus = 

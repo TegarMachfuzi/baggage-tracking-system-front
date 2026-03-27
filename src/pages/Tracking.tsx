@@ -8,10 +8,13 @@ import { Tracking, TrackingStatus } from '@/src/types';
 import { formatDate, truncateUUID, cn } from '@/src/utils';
 
 export function TrackingPage() {
-  const { allTrackingQuery, createCheckpoint } = useTracking();
+  const { getBaggageHistory, createCheckpoint } = useTracking();
   const [searchTerm, setSearchTerm] = React.useState('');
+  const [baggageId, setBaggageId] = React.useState('');
   const [isCheckpointModalOpen, setIsCheckpointModalOpen] = React.useState(false);
-  
+
+  const baggageHistoryQuery = getBaggageHistory(baggageId);
+
   const [checkpointData, setCheckpointData] = React.useState({
     baggageId: '',
     location: '',
@@ -19,8 +22,7 @@ export function TrackingPage() {
     remarks: '',
   });
 
-  const filteredTracking = allTrackingQuery.data?.filter(t => 
-    t.baggageId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredTracking = baggageHistoryQuery.data?.filter(t =>
     t.location.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
@@ -74,15 +76,26 @@ export function TrackingPage() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input
-            type="text"
-            placeholder="Search by Baggage ID or Location..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
-          />
+        <div className="flex flex-1 max-w-2xl gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input
+              type="text"
+              placeholder="Enter Baggage ID..."
+              value={baggageId}
+              onChange={(e) => setBaggageId(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm font-mono"
+            />
+          </div>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Filter by location..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm"
+            />
+          </div>
         </div>
         <button
           onClick={() => setIsCheckpointModalOpen(true)}
@@ -113,8 +126,8 @@ export function TrackingPage() {
       <Table 
         columns={columns} 
         data={filteredTracking} 
-        isLoading={allTrackingQuery.isLoading}
-        emptyMessage="No tracking events recorded yet."
+        isLoading={baggageHistoryQuery.isLoading}
+        emptyMessage={baggageId ? "No tracking events found for this baggage." : "Enter a Baggage ID to view tracking history."}
       />
 
       {/* Checkpoint Modal */}

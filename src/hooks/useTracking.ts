@@ -6,14 +6,6 @@ import { toast } from 'sonner';
 export function useTracking() {
   const queryClient = useQueryClient();
 
-  const allTrackingQuery = useQuery({
-    queryKey: ['tracking'],
-    queryFn: async () => {
-      // Assuming there's a list endpoint for all tracking events or we fetch recent ones
-      const response = await apiClient.get<ApiResponse<Tracking[]>>('/api/tracking');
-      return response.data.data;
-    },
-  });
 
   const getBaggageHistory = (baggageId: string) => useQuery({
     queryKey: ['tracking', 'baggage', baggageId],
@@ -38,7 +30,6 @@ export function useTracking() {
   });
 
   return {
-    allTrackingQuery,
     getBaggageHistory,
     createCheckpoint,
   };

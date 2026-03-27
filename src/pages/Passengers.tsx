@@ -23,8 +23,8 @@ export function Passengers() {
     name: '',
     email: '',
     phone: '',
-    bookingRef: '',
-    flightInfo: '',
+    passportNumber: '',
+    nationality: '',
   });
 
   const filteredPassengers = passengersQuery.data?.filter(p => 
@@ -37,7 +37,7 @@ export function Passengers() {
     createPassenger.mutate(formData, {
       onSuccess: () => {
         setIsCreateModalOpen(false);
-        setFormData({ name: '', email: '', phone: '', bookingRef: '', flightInfo: '' });
+      setFormData({ name: '', email: '', phone: '', passportNumber: '', nationality: '' });
       }
     });
   };
@@ -92,14 +92,14 @@ export function Passengers() {
     { header: 'Email', accessor: 'email' },
     { header: 'Phone', accessor: 'phone' },
     { 
-      header: 'Booking Ref', 
+      header: 'Passport No.', 
       accessor: (p: Passenger) => (
         <span className="font-mono text-xs font-bold bg-slate-100 px-2 py-1 rounded text-slate-600">
-          {p.bookingRef}
+          {p.passportNumber}
         </span>
       )
     },
-    { header: 'Flight Info', accessor: 'flightInfo' },
+    { header: 'Nationality', accessor: 'nationality' },
     { 
       header: 'Actions', 
       accessor: (p: Passenger) => (
@@ -195,25 +195,25 @@ export function Passengers() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Booking Ref</label>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Passport Number</label>
               <input
                 type="text"
                 required
-                value={formData.bookingRef}
-                onChange={(e) => setFormData({ ...formData, bookingRef: e.target.value })}
+                value={formData.passportNumber}
+                onChange={(e) => setFormData({ ...formData, passportNumber: e.target.value })}
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono"
-                placeholder="ABC123"
+                placeholder="A12345678"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Flight Info</label>
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Nationality</label>
               <input
                 type="text"
                 required
-                value={formData.flightInfo}
-                onChange={(e) => setFormData({ ...formData, flightInfo: e.target.value })}
+                value={formData.nationality}
+                onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
                 className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                placeholder="GA123"
+                placeholder="Indonesia"
               />
             </div>
           </div>
@@ -244,9 +244,9 @@ export function Passengers() {
                 <h3 className="text-2xl font-bold text-slate-900">{selectedPassenger.name}</h3>
                 <p className="text-slate-500 flex items-center gap-2 mt-1">
                   <span className="font-mono bg-slate-100 px-2 py-0.5 rounded text-xs font-bold text-slate-600">
-                    {selectedPassenger.bookingRef}
+                    {selectedPassenger.passportNumber}
                   </span>
-                  • {selectedPassenger.flightInfo}
+                  • {selectedPassenger.nationality}
                 </p>
               </div>
             </div>
