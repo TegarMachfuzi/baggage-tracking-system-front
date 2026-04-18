@@ -225,7 +225,7 @@ export function BaggagePage() {
             >
               <option value="">Select Passenger</option>
               {passengersQuery.data?.map(p => (
-                <option key={p.id} value={p.id}>{p.name} ({p.bookingRef})</option>
+                <option key={p.id} value={p.id}>{p.name} ({p.passportNumber})</option>
               ))}
             </select>
           </div>
