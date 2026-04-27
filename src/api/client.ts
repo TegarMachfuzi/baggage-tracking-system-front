@@ -21,7 +21,10 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    const message = error.response?.data?.responseMessage || error.message || 'An unexpected error occurred';
+    const message = error.response?.data?.responseMessage 
+      || error.response?.data?.error 
+      || error.message 
+      || 'An unexpected error occurred';
     toast.error(message);
     
     if (error.response?.status === 401) {

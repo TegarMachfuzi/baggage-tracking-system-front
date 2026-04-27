@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 
 import { Layout } from './components/Layout';
+import { UserLayout } from './components/UserLayout';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
@@ -11,6 +12,8 @@ import { Passengers } from './pages/Passengers';
 import { BaggagePage } from './pages/Baggage';
 import { TrackingPage } from './pages/Tracking';
 import { Claims } from './pages/Claims';
+import { UserTrackingPage } from './pages/user/UserTrackingPage';
+import { UserClaimsPage } from './pages/user/UserClaimsPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,18 +24,25 @@ const queryClient = new QueryClient({
   },
 });
 
-function ProtectedRoute() {
-  const token = localStorage.getItem('token');
-  
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
+function getUser() {
+  const str = localStorage.getItem('user');
+  return str ? JSON.parse(str) : null;
+}
 
-  return (
-    <Layout>
-      <Outlet />
-    </Layout>
-  );
+function AdminRoute() {
+  const token = localStorage.getItem('token');
+  const user = getUser();
+  if (!token) return <Navigate to="/login" replace />;
+  if (user?.role === 'USER') return <Navigate to="/user/tracking" replace />;
+  return <Layout><Outlet /></Layout>;
+}
+
+function UserRoute() {
+  const token = localStorage.getItem('token');
+  const user = getUser();
+  if (!token) return <Navigate to="/login" replace />;
+  if (user?.role !== 'USER') return <Navigate to="/" replace />;
+  return <UserLayout><Outlet /></UserLayout>;
 }
 
 export default function App() {
@@ -40,12 +50,12 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
-          {/* Public Routes */}
+          {/* Public */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Protected Routes */}
-          <Route element={<ProtectedRoute />}>
+          {/* Admin / Staff */}
+          <Route element={<AdminRoute />}>
             <Route path="/" element={<Dashboard />} />
             <Route path="/passengers" element={<Passengers />} />
             <Route path="/baggage" element={<BaggagePage />} />
@@ -53,7 +63,12 @@ export default function App() {
             <Route path="/claims" element={<Claims />} />
           </Route>
 
-          {/* Fallback */}
+          {/* User */}
+          <Route element={<UserRoute />}>
+            <Route path="/user/tracking" element={<UserTrackingPage />} />
+            <Route path="/user/claims" element={<UserClaimsPage />} />
+          </Route>
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

@@ -25,7 +25,7 @@ export function Login() {
       localStorage.setItem('user', JSON.stringify(user));
       
       toast.success('Login successful! Welcome back.');
-      navigate('/');
+      navigate(user.role === 'USER' ? '/user/tracking' : '/');
     } catch (error) {
       // Error handled by interceptor
     } finally {

@@ -1,8 +1,7 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Plane, Mail, Lock, User, Phone, Loader2 } from 'lucide-react';
+import { Plane, Mail, Lock, User, Phone, BookOpen, Globe, Loader2 } from 'lucide-react';
 import { apiClient } from '@/src/api/client';
-import { ApiResponse } from '@/src/types';
 import { toast } from 'sonner';
 
 export function Register() {
@@ -14,22 +13,29 @@ export function Register() {
     password: '',
     fullName: '',
     phone: '',
+    passportNumber: '',
+    nationality: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
     try {
-      await apiClient.post<ApiResponse<any>>('/api/users/register', formData);
-      toast.success('Registration successful! Please login.');
-      navigate('/login');
+      const response = await apiClient.post<any>('/api/users/register', formData);
+      const { token, passengerId, ...user } = response.data;
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify({ ...user, passengerId }));
+      toast.success('Registration successful!');
+      navigate(user.role === 'USER' ? '/user/tracking' : '/');
     } catch (error) {
-      // Error handled by interceptor
+      // handled by interceptor
     } finally {
       setIsLoading(false);
     }
   };
+
+  const field = (key: keyof typeof formData) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, [key]: e.target.value });
 
   return (
     <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-4 py-12">
@@ -48,41 +54,26 @@ export function Register() {
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Full Name</label>
               <div className="relative group">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={16} />
-                <input
-                  type="text"
-                  required
-                  value={formData.fullName}
-                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                <input type="text" required value={formData.fullName} onChange={field('fullName')}
                   className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-                  placeholder="John Doe"
-                />
+                  placeholder="John Doe" />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Username</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.username}
-                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                <input type="text" required value={formData.username} onChange={field('username')}
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-                  placeholder="johndoe"
-                />
+                  placeholder="johndoe" />
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Phone</label>
                 <div className="relative group">
                   <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={16} />
-                  <input
-                    type="text"
-                    required
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  <input type="text" required value={formData.phone} onChange={field('phone')}
                     className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-                    placeholder="+123456789"
-                  />
+                    placeholder="+123456789" />
                 </div>
               </div>
             </div>
@@ -91,14 +82,30 @@ export function Register() {
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Email Address</label>
               <div className="relative group">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={16} />
-                <input
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                <input type="email" required value={formData.email} onChange={field('email')}
                   className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-                  placeholder="john@example.com"
-                />
+                  placeholder="john@example.com" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Passport No.</label>
+                <div className="relative group">
+                  <BookOpen className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={16} />
+                  <input type="text" required value={formData.passportNumber} onChange={field('passportNumber')}
+                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm font-mono"
+                    placeholder="A12345678" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Nationality</label>
+                <div className="relative group">
+                  <Globe className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={16} />
+                  <input type="text" required value={formData.nationality} onChange={field('nationality')}
+                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
+                    placeholder="Indonesia" />
+                </div>
               </div>
             </div>
 
@@ -106,6 +113,29 @@ export function Register() {
               <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Password</label>
               <div className="relative group">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={16} />
+                <input type="password" required value={formData.password} onChange={field('password')}
+                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
+                  placeholder="••••••••" />
+              </div>
+            </div>
+
+            <button type="submit" disabled={isLoading}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed mt-4">
+              {isLoading ? <Loader2 size={20} className="animate-spin" /> : 'Create Account'}
+            </button>
+          </form>
+
+          <div className="mt-8 text-center">
+            <p className="text-slate-500 text-sm">
+              Already have an account?{' '}
+              <Link to="/login" className="text-blue-600 font-bold hover:underline">Sign In</Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
                 <input
                   type="password"
                   required

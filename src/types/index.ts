@@ -6,6 +6,7 @@ export interface User {
   username: string;
   email: string;
   role: UserRole;
+  passengerId?: string;
 }
 
 export interface ApiResponse<T> {
