@@ -24,24 +24,24 @@ const queryClient = new QueryClient({
   },
 });
 
-function getUser() {
+function getAuth() {
+  const token = localStorage.getItem('token');
   const str = localStorage.getItem('user');
-  return str ? JSON.parse(str) : null;
+  const user = str ? JSON.parse(str) : null;
+  return { token, role: user?.role ?? null };
 }
 
 function AdminRoute() {
-  const token = localStorage.getItem('token');
-  const user = getUser();
+  const { token, role } = getAuth();
   if (!token) return <Navigate to="/login" replace />;
-  if (user?.role === 'USER') return <Navigate to="/user/tracking" replace />;
+  if (role === 'USER') return <Navigate to="/user/tracking" replace />;
   return <Layout><Outlet /></Layout>;
 }
 
 function UserRoute() {
-  const token = localStorage.getItem('token');
-  const user = getUser();
+  const { token, role } = getAuth();
   if (!token) return <Navigate to="/login" replace />;
-  if (user?.role !== 'USER') return <Navigate to="/" replace />;
+  if (role !== 'USER') return <Navigate to="/" replace />;
   return <UserLayout><Outlet /></UserLayout>;
 }
 

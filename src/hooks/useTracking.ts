@@ -3,11 +3,19 @@ import { apiClient } from '@/src/api/client';
 import { ApiResponse, Tracking, TrackingStatus } from '@/src/types';
 import { toast } from 'sonner';
 
-export function useTracking() {
-  const queryClient = useQueryClient();
+export function useTrackingLocations() {
+  return useQuery({
+    queryKey: ['tracking-locations'],
+    queryFn: async () => {
+      const res = await apiClient.get<ApiResponse<Record<TrackingStatus, string>>>('/api/tracking/locations');
+      return res.data.data;
+    },
+    staleTime: Infinity,
+  });
+}
 
-
-  const getBaggageHistory = (baggageId: string) => useQuery({
+export function useBaggageHistory(baggageId: string) {
+  return useQuery({
     queryKey: ['tracking', 'baggage', baggageId],
     queryFn: async () => {
       const response = await apiClient.get<ApiResponse<Tracking[]>>(`/api/tracking/baggage/${baggageId}`);
@@ -15,6 +23,10 @@ export function useTracking() {
     },
     enabled: !!baggageId,
   });
+}
+
+export function useTracking() {
+  const queryClient = useQueryClient();
 
   const createCheckpoint = useMutation({
     mutationFn: async (data: Omit<Tracking, 'id' | 'timestamp'>) => {
@@ -29,8 +41,5 @@ export function useTracking() {
     },
   });
 
-  return {
-    getBaggageHistory,
-    createCheckpoint,
-  };
+  return { createCheckpoint };
 }

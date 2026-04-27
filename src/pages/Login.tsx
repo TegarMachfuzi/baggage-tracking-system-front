@@ -18,12 +18,14 @@ export function Login() {
     setIsLoading(true);
     
     try {
-      const response = await apiClient.post<User>('/api/users/login', formData);
-      const { token, ...user } = response.data;
-      
+      const response = await apiClient.post<any>('/api/users/login', formData);
+      // Backend returns AuthResponse directly (not wrapped in ApiResponse)
+      const data = response.data?.data ?? response.data;
+      const { token, ...user } = data;
+
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
-      
+
       toast.success('Login successful! Welcome back.');
       navigate(user.role === 'USER' ? '/user/tracking' : '/');
     } catch (error) {

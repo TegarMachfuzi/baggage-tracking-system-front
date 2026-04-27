@@ -22,7 +22,8 @@ export function Register() {
     setIsLoading(true);
     try {
       const response = await apiClient.post<any>('/api/users/register', formData);
-      const { token, passengerId, ...user } = response.data;
+      const data = response.data?.data ?? response.data;
+      const { token, passengerId, ...user } = data;
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify({ ...user, passengerId }));
       toast.success('Registration successful!');
@@ -129,39 +130,6 @@ export function Register() {
             <p className="text-slate-500 text-sm">
               Already have an account?{' '}
               <Link to="/login" className="text-blue-600 font-bold hover:underline">Sign In</Link>
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-                <input
-                  type="password"
-                  required
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed mt-4"
-            >
-              {isLoading ? <Loader2 size={20} className="animate-spin" /> : 'Create Account'}
-            </button>
-          </form>
-
-          <div className="mt-8 text-center">
-            <p className="text-slate-500 text-sm">
-              Already have an account?{' '}
-              <Link to="/login" className="text-blue-600 font-bold hover:underline">
-                Sign In
-              </Link>
             </p>
           </div>
         </div>

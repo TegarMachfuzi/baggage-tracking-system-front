@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { useBaggage } from '@/src/hooks/useBaggage';
 import { usePassengers } from '@/src/hooks/usePassengers';
-import { useTracking } from '@/src/hooks/useTracking';
+import { useTracking, useBaggageHistory, useTrackingLocations } from '@/src/hooks/useTracking';
 import { Table } from '@/src/components/Table';
 import { Modal } from '@/src/components/Modal';
 import { ConfirmDialog } from '@/src/components/ConfirmDialog';
@@ -34,7 +34,8 @@ const BAGGAGE_STATUSES: BaggageStatus[] = [
 export function BaggagePage() {
   const { baggageQuery, createBaggage, updateBaggage, updateStatus, deleteBaggage } = useBaggage();
   const { passengersQuery } = usePassengers();
-  const { getBaggageHistory, createCheckpoint } = useTracking();
+  const { createCheckpoint } = useTracking();
+  const { data: defaultLocations } = useTrackingLocations();
   
   const [searchTerm, setSearchTerm] = React.useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
@@ -58,7 +59,16 @@ export function BaggagePage() {
     remarks: '',
   });
 
-  const { data: history, isLoading: isLoadingHistory } = getBaggageHistory(selectedBaggage?.id || '');
+  // Auto-fill location when status changes
+  const handleCheckpointStatusChange = (status: TrackingStatus) => {
+    setCheckpointData(prev => ({
+      ...prev,
+      status,
+      location: defaultLocations?.[status] ?? prev.location,
+    }));
+  };
+
+  const { data: history, isLoading: isLoadingHistory } = useBaggageHistory(selectedBaggage?.id || '');
 
   const filteredBaggage = baggageQuery.data?.filter(b => 
     b.barcode.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -92,7 +102,7 @@ export function BaggagePage() {
       }, {
         onSuccess: () => {
           setIsCheckpointModalOpen(false);
-          setCheckpointData({ location: '', status: 'CHECKED_IN', remarks: '' });
+          setCheckpointData({ location: defaultLocations?.['CHECKED_IN'] ?? '', status: 'CHECKED_IN', remarks: '' });
         }
       });
     }
@@ -310,22 +320,11 @@ export function BaggagePage() {
       >
         <form onSubmit={handleAddCheckpoint} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Location</label>
-            <input
-              type="text"
-              required
-              value={checkpointData.location}
-              onChange={(e) => setCheckpointData({ ...checkpointData, location: e.target.value })}
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-              placeholder="e.g. Terminal 3, Gate 12"
-            />
-          </div>
-          <div className="space-y-1">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Status</label>
             <select
               required
               value={checkpointData.status}
-              onChange={(e) => setCheckpointData({ ...checkpointData, status: e.target.value as TrackingStatus })}
+              onChange={(e) => handleCheckpointStatusChange(e.target.value as TrackingStatus)}
               className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
             >
               <option value="CHECKED_IN">CHECKED_IN</option>
@@ -336,6 +335,17 @@ export function BaggagePage() {
               <option value="CUSTOMS_CHECK">CUSTOMS_CHECK</option>
               <option value="READY_FOR_PICKUP">READY_FOR_PICKUP</option>
             </select>
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Location</label>
+            <input
+              type="text"
+              required
+              value={checkpointData.location}
+              onChange={(e) => setCheckpointData({ ...checkpointData, location: e.target.value })}
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              placeholder="e.g. Terminal 3, Gate 12"
+            />
           </div>
           <div className="space-y-1">
             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Remarks</label>
